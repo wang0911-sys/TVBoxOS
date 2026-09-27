@@ -95,6 +95,11 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ matrix.java_ver }}
+      - name: Configure Android SDK
+        if: ${{ env.commit }}
+        working-directory: TVBoxOSC
+        run: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
       - uses: gradle/actions/setup-gradle@v4
         if: ${{ env.commit }}
       - name: Build With Gradle
