@@ -66,6 +66,15 @@ public class App extends MultiDexApplication {
         Hawk.init(this).build();
         Hawk.put(HawkConfig.DEBUG_OPEN, false);
         Hawk.put(HawkConfig.PLAYER_IS_LIVE, false);
+
+        // Preconfigure sources on a fresh install. Keep user changes on later launches.
+        if (!Hawk.contains(HawkConfig.API_URL)) {
+            Hawk.put(HawkConfig.API_URL, "http://www.饭太硬.art/tv");
+        }
+        if (!Hawk.contains(HawkConfig.LIVE_API_URL)) {
+            Hawk.put(HawkConfig.LIVE_API_URL, "https://raw.githubusercontent.com/wang0911-sys/unifi-tvbox/main/live.txt");
+        }
+
         if (!Hawk.contains(HawkConfig.PLAY_TYPE)) {
             Hawk.put(HawkConfig.PLAY_TYPE, 2);
         } else if (Hawk.get(HawkConfig.PLAY_TYPE, 2) == 0) {
