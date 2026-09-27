@@ -95,11 +95,16 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ matrix.java_ver }}
+      - uses: actions/setup-python@v5
+        if: ${{ env.commit }}
+        with:
+          python-version: '3.10'
       - name: Configure Android SDK
         if: ${{ env.commit }}
         working-directory: TVBoxOSC
         run: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          echo "PYTHON=$(which python)" >> $GITHUB_ENV
       - uses: gradle/actions/setup-gradle@v4
         if: ${{ env.commit }}
       - name: Build With Gradle
