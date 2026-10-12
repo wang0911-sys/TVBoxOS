@@ -51,7 +51,7 @@ jobs:
           if [ -z "$APK" ]; then APK="$(find tv/build/outputs/apk/original/debug -type f -name '*.apk' | head -n 1)"; fi
           test -n "$APK"
           cp "$APK" ../artifacts/China-IPTV-Wuhan-Fixed.apk
-          sha256sum ../artifacts/China-IPTV-Wuhan.apk > ../artifacts/SHA256.txt
+          sha256sum ../artifacts/China-IPTV-Wuhan-Fixed.apk > ../artifacts/SHA256.txt
       - name: Verify minimum SDK, APK alignment and signatures
         run: |
           APK="artifacts/China-IPTV-Wuhan-Fixed.apk"
