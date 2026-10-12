@@ -24,5 +24,19 @@ strings.write_text(txt.replace('<string name="app_name">电视直播</string>', 
 gradle = root / "tv/build.gradle.kts"
 txt = gradle.read_text(encoding="utf-8")
 assert 'applicationId = "com.github.mytv.android"' in txt
-gradle.write_text(txt.replace('applicationId = "com.github.mytv.android"', 'applicationId = "com.wang0911.chinaiptv"'), encoding="utf-8")
+txt = txt.replace('applicationId = "com.github.mytv.android"', 'applicationId = "com.wang0911.chinaiptv"')
+# Prefer a conservative target API for older Android TV firmware.
+txt = txt.replace('targetSdk = libs.versions.targetSdk.get().toInt()', 'targetSdk = 28')
+# Legacy extraction avoids native library packaging issues on vendor Android 5-8 ROMs.
+needle = """    packaging {
+        resources {
+"""
+assert needle in txt
+txt = txt.replace(needle, """    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+        resources {
+""")
+gradle.write_text(txt, encoding="utf-8")
 print("China IPTV customization applied")
