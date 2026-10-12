@@ -1,30 +1,35 @@
-# 中国国内 IPTV · 湖北联通专用
+# 中国 IPTV · 武汉联通版
 
-这是中国国内网络的节目订阅文件，与马来西亚 Unifi 直播源分开维护。
+这个目录独立管理中国国内 IPTV 频道，与马来西亚 Unifi 配置互不干扰。
 
-## 固定订阅链接
+## 直播源远程订阅
 
-M3U（推荐用于电视直播 TV、VLC 等）：
+- TXT: https://raw.githubusercontent.com/wang0911-sys/TVBoxOS/main/china-iptv/live.txt
+- M3U: https://raw.githubusercontent.com/wang0911-sys/TVBoxOS/main/china-iptv/live.m3u
 
-```text
-https://raw.githubusercontent.com/wang0911-sys/TVBoxOS/main/china-iptv/live.m3u
-```
+根据用户提供的《湖北联通.txt》整理为 60 条 RTSP 单播候选线路。分为武汉本地、央视、湖北、卫视、教育、特色，共 6 组。含 CCTV-5 与 CCTV-5+。
 
-TXT（推荐用于支持「频道,URL」及「分类,#genre#」格式的播放器）：
+**重要：原始列表中的认证参数带有 2021—2022 年日期。公开文件已删除认证参数，仅保留 RTSP 基础路径。因此直播是否可播放尚未验证；联通 IPTV 专网、有效授权等限制依然存在。** 远程订阅更新只更新频道地址，不会绕过联通的认证与网络隔离。
 
-```text
-https://raw.githubusercontent.com/wang0911-sys/TVBoxOS/main/china-iptv/live.txt
-```
+## 中国 IPTV 安卓电视专用 APK
 
-## 与马来西亚源的区别
+- 应用显示名称：中国 IPTV
+- 默认订阅：本目录 `live.txt`
+- 代码补丁：[`android/patch_china.py`](./android/patch_china.py)
+- 构建流程：[`.github/workflows/build-china-iptv.yml`](../.github/workflows/build-china-iptv.yml)
+- APK 下载：[GitHub Releases](https://github.com/wang0911-sys/TVBoxOS/releases/tag/china-iptv-wuhan-v1)（只在编译成功后才存在）
 
-- 中国国内（本目录）：`wang0911-sys/TVBoxOS/china-iptv/`
-- 马来西亚 Unifi（独立仓库）：`wang0911-sys/unifi-tvbox/live.txt`
+基于 [sakana164/mytv_android](https://github.com/sakana164/mytv_android) 历史 GPL-3.0 源码（提交 `fc78a7f392f1552826c0bb2b06c8a817a4dd16ef`）二次配置，非联通或原软件开发者官方产品。二次分享 APK 时应遵守开源许可证。
 
-## 管理
+## 远程维护
 
-编辑本目录中的直播列表文件并提交即可改变对应的订阅内容。M3U 与 TXT 是两个独立文件，编辑一种不会自动同步另一种。播放器需刷新订阅或等待其自动更新。
+在 GitHub 上直接编辑 `china-iptv/live.txt`，机顶盒的预设列表可通过手动刷新或缓存到期重新读取更新内容，**不需重新编译 APK**。M3U 和 TXT 仍是独立文件，更新一个不会自动同步另一个；本应用预设使用 TXT。
 
-源列表来自公开的湖北联通单播列表，整理于 2026-10-12，保留原始 RTSP 地址和参数。原始认证参数包含历史日期且可能过期，所有线路**均未实测可播放**。不保证在普通宽带 Wi-Fi 上能访问运营商 IPTV 专网服务。
+更新 Android 代码才会触发 GitHub Actions 自动编译；修改直播源不会触发 APK 重编译。
 
-该仓库是公开的，请不要上传自己真实使用的 IPTV 账号、密码、设备识别信息或未过期的授权 token。
+## 和马来西亚版分开
+
+- 中国：此目录 `TVBoxOS/china-iptv/`
+- 马来西亚：独立仓库 [unifi-tvbox](https://github.com/wang0911-sys/unifi-tvbox)
+
+应用采用临时签名的构建方式。未来若重新编译安装包，可能需要先卸载旧 APK；若需无缝升级，应在仓库 Secrets 中设置稳定签名密钥而非上传到公开仓库。
