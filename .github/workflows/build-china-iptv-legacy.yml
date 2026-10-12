@@ -26,6 +26,10 @@ jobs:
         run: |
           python3 china-iptv/android/patch_legacy.py
           chmod +x gradlew
+      - name: Configure SDK path for older Gradle plugins
+        run: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          echo "PYTHON=$(which python3)" >> "$GITHUB_ENV"
       - name: Build API19 32-bit APK
         run: |
           ./gradlew :app:assembleJava32Debug --no-daemon --stacktrace
