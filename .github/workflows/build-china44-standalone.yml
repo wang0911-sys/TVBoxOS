@@ -1,0 +1,65 @@
+name: Build China IPTV Android 4.4 Standalone APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'china-iptv/standalone-android44/**'
+      - '.github/workflows/build-china44-standalone.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-android44:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout independent China IPTV app
+        uses: actions/checkout@v4
+      - name: Prepare Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Android SDK build tools
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-33 build-tools;33.0.2"
+          log-accepted-android-sdk-licenses: false
+      - name: Compile independent Android 4.4+ APK
+        run: |
+          bash china-iptv/standalone-android44/build.sh
+          unzip -t artifacts/China-IPTV-Android-4.4.apk | tail -n 3
+      - name: Upload installable APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: China-IPTV-Android44-Standalone
+          path: |
+            artifacts/China-IPTV-Android-4.4.apk
+            artifacts/SHA256-Android44.txt
+          retention-days: 30
+          if-no-files-found: error
+      - name: Publish Android 4.4 standalone APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: china-iptv-android44-standalone-v1
+          name: 中国 IPTV 4.4.2 · 独立轻量直播 APK
+          prerelease: true
+          files: artifacts/China-IPTV-Android-4.4.apk
+          fail_on_unmatched_files: true
+          body: |
+            Independently written lightweight Android TV application, Android 4.4 (API 19)+.
+            This is NOT a Ku9 Lite build and does not modify TVBox.
+
+            Bundled candidate China IPTV channel list and GitHub remote TXT/M3U refresh.
+            Default playlist: https://raw.githubusercontent.com/wang0911-sys/TVBoxOS/main/china-iptv/live.txt
+
+            Android's built-in VideoView/MediaPlayer powers playback. RTSP support depends on
+            the device firmware, valid authorization and Unicom IPTV network access.
+            Channel playback is not guaranteed.
+
+            Compiled, ZIP-checked and APK signature verified for minSdk19.
+            No physical STB installation test has been performed.
+            Ephemeral signing key: reinstall may be required if updating this APK.
