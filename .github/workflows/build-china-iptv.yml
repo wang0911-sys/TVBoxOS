@@ -43,27 +43,34 @@ jobs:
       - name: Compile universal Android APK
         working-directory: app_source
         env:
-          VERSION_CODE: '1'
+          VERSION_CODE: '2'
         run: |
           ./gradlew :tv:assembleOriginalDebug --no-daemon --stacktrace
           mkdir -p ../artifacts
           APK="$(find tv/build/outputs/apk/original/debug -type f -name '*all*.apk' | head -n 1)"
           if [ -z "$APK" ]; then APK="$(find tv/build/outputs/apk/original/debug -type f -name '*.apk' | head -n 1)"; fi
           test -n "$APK"
-          cp "$APK" ../artifacts/China-IPTV-Wuhan.apk
+          cp "$APK" ../artifacts/China-IPTV-Wuhan-Fixed.apk
           sha256sum ../artifacts/China-IPTV-Wuhan.apk > ../artifacts/SHA256.txt
+      - name: Verify minimum SDK, APK alignment and signatures
+        run: |
+          APK="artifacts/China-IPTV-Wuhan-Fixed.apk"
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT}}"
+          "$SDK/build-tools/36.0.0/aapt" dump badging "$APK" | grep -E "package:|sdkVersion:|targetSdkVersion:|native-code:"
+          "$SDK/build-tools/36.0.0/zipalign" -c -v 4 "$APK"
+          "$SDK/build-tools/36.0.0/apksigner" verify --verbose --min-sdk-version 21 "$APK"
       - name: Publish build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: China-IPTV-Wuhan-APK
+          name: China-IPTV-Wuhan-Fixed-APK
           path: artifacts/*
           retention-days: 30
           if-no-files-found: error
       - name: Add APK to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: china-iptv-wuhan-v1
-          name: China IPTV - Wuhan Unicom v1
+          tag_name: china-iptv-wuhan-v2
+          name: 中国 IPTV · 武汉联通 v2（兼容修正版）
           prerelease: true
           files: artifacts/China-IPTV-Wuhan.apk
           fail_on_unmatched_files: true
