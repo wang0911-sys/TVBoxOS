@@ -32,3 +32,38 @@ jobs:
           cd app_source
           python3 ../china-iptv/android/patch_china.py
           chmod +x gradlew
+      - name: Prepare temporary APK signing
+        run: |
+          PASSWORD="$(openssl rand -hex 16)"
+          keytool -genkeypair -noprompt -v -keystore "$GITHUB_WORKSPACE/china-sign.jks" -alias china -storepass "$PASSWORD" -keypass "$PASSWORD" -keyalg RSA -keysize 2048 -validity 3650 -dname "CN=China Community TV,O=Community,C=CN"
+          echo "KEYSTORE=$GITHUB_WORKSPACE/china-sign.jks" >> "$GITHUB_ENV"
+          echo "KEYSTORE_PASSWORD=$PASSWORD" >> "$GITHUB_ENV"
+          echo "KEY_ALIAS=china" >> "$GITHUB_ENV"
+          echo "KEY_PASSWORD=$PASSWORD" >> "$GITHUB_ENV"
+      - name: Compile universal Android APK
+        working-directory: app_source
+        env:
+          VERSION_CODE: '1'
+        run: |
+          ./gradlew :tv:assembleOriginalDebug --no-daemon --stacktrace
+          mkdir -p ../artifacts
+          APK="$(find tv/build/outputs/apk/original/debug -type f -name '*all*.apk' | head -n 1)"
+          if [ -z "$APK" ]; then APK="$(find tv/build/outputs/apk/original/debug -type f -name '*.apk' | head -n 1)"; fi
+          test -n "$APK"
+          cp "$APK" ../artifacts/China-IPTV-Wuhan.apk
+          sha256sum ../artifacts/China-IPTV-Wuhan.apk > ../artifacts/SHA256.txt
+      - name: Publish build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: China-IPTV-Wuhan-APK
+          path: artifacts/*
+          retention-days: 30
+          if-no-files-found: error
+      - name: Add APK to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: china-iptv-wuhan-v1
+          name: China IPTV - Wuhan Unicom v1
+          prerelease: true
+          files: artifacts/China-IPTV-Wuhan.apk
+          fail_on_unmatched_files: true
